@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IoT Environmental Monitoring Platform</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg-color: #050b14;
+      --card-bg: rgba(13, 22, 38, 0.6);
+      --card-border: rgba(57, 214, 208, 0.15);
+      --primary-cyan: #39d6d0;
+      --primary-turquoise: #1eb9af;
+      --accent-blue: #2a6df4;
+      --text-main: #e8eef8;
+      --text-muted: #9eb0c9;
+      --danger: #f87171;
+      --success: #34d399;
+      --warning: #fbbf24;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-color);
+      background-image: 
+        radial-gradient(circle at 15% 50%, rgba(20, 44, 66, 0.4), transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(57, 214, 208, 0.05), transparent 25%);
+      color: var(--text-main);
+      line-height: 1.6;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    /* Glassmorphism */
+    .glass {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Navbar */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 40px;
+      background: rgba(5, 11, 20, 0.8);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .logo {
+      font-weight: 700;
+      font-size: 20px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-icon {
+      color: var(--primary-cyan);
+    }
+    .nav-links {
+      display: flex;
+      gap: 25px;
+    }
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+    .nav-links a:hover {
+      color: var(--primary-cyan);
+    }
+    .nav-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.05);
+    }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--danger);
+      box-shadow: 0 0 10px var(--danger);
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+    .status-dot.active {
+      background: var(--success);
+      box-shadow: 0 0 10px var(--success);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 100px 20px 40px;
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 60px 0;
+      position: relative;
+    }
+    .hero h1 {
+      font-size: clamp(32px, 5vw, 56px);
+      font-weight: 700;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #fff 0%, #9eb0c9 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      color: var(--text-muted);
+      font-size: 18px;
+      max-width: 600px;
+      margin: 0 auto 40px;
+    }
+    .hero-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+    .btn {
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-cyan), var(--primary-turquoise));
+      color: #000;
+      box-shadow: 0 4px 15px rgba(57, 214, 208, 0.3);
+    }
+    .btn-primary:hover {
+      box-shadow: 0 6px 20px rgba(57, 214, 208, 0.5);
+      transform: translateY(-2px);
+    }
+    .btn-outline {
+      background: transparent;
+      color: var(--text-main);
+      border: 1px solid var(--text-muted);
+    }
+    .btn-outline:hover {
+      border-color: var(--primary-cyan);
+      color: var(--primary-cyan);
+    }
+
+    /* Section Headers */
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    section {
+      margin-bottom: 60px;
+      padding-top: 80px;
+      margin-top: -80px;
+    }
+
+    /* Grid Layouts */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+
+    /* Cards */
+    .stat-card {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--primary-cyan), transparent);
+      opacity: 0.5;
+    }
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+    .stat-icon {
+      font-size: 20px;
+      background: rgba(57, 214, 208, 0.1);
+      width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 10px;
+      color: var(--primary-cyan);
+    }
+    .stat-value {
+      font-size: 36px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 5px;
+    }
+    .stat-unit {
+      font-size: 18px;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+    .stat-footer {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: auto;
+      padding-top: 15px;
+    }
+
+    /* Predictions */
+    .pred-panel {
+      padding: 30px;
+    }
+    .pred-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .pred-row:last-child { border-bottom: none; }
+    .pred-time { color: var(--text-muted); font-size: 14px; }
+    .pred-temp { font-size: 20px; font-weight: 600; color: var(--primary-cyan); }
+    .pred-info { font-size: 12px; color: var(--text-muted); margin-top: 15px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;}
+
+    /* Charts */
+    .chart-container {
+      position: relative;
+      height: 300px;
+      width: 100%;
+      padding: 20px;
+    }
+
+    /* Table */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .data-table th, .data-table td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .data-table th {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Team */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+    .team-card {
+      padding: 20px;
+      text-align: center;
+    }
+    .team-name { font-weight: 600; color: #fff; margin-bottom: 5px; }
+    .team-roll { color: var(--primary-cyan); font-size: 14px; }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 30px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-top: 50px;
+    }
+
+    /* Alerts */
+    .alert {
+      padding: 15px 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      display: none;
+    }
+    .alert.visible { display: block; }
+    .alert-warning { background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); color: var(--warning); }
+    
+    @media (max-width: 900px) {
+      .grid-4, .grid-2 { grid-template-columns: 1fr; }
+      nav { padding: 15px 20px; flex-direction: column; gap: 15px; }
+      .nav-links { flex-wrap: wrap; justify-content: center; }
+      .container { padding-top: 140px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">
+      <span class="logo-icon">▲</span> IoT Dashboard
+    </div>
+    <div class="nav-links">
+      <a href="#home">Home</a>
+      <a href="#live">Live Dashboard</a>
+      <a href="#predictions">Predictions</a>
+      <a href="#historical">Historical Data</a>
+      <a href="#about">About</a>
+    </div>
+    <div class="nav-status">
+      <div class="status-dot" id="nav-dot"></div>
+      <span id="nav-status-text">Connecting...</span>
+    </div>
+  </nav>
+
+  <div class="container">
+    
+    <section id="home" class="hero">
+      <h1>Monitor Your Environment.<br>Predict What Comes Next.</h1>
+      <p>An intelligent IoT platform for real-time temperature and humidity monitoring, historical analysis, and short-term temperature forecasting.</p>
+      <div class="hero-buttons">
+        <a href="#live" class="btn btn-primary">View Live Dashboard</a>
+        <a href="#predictions" class="btn btn-outline">Explore Predictions</a>
+      </div>
+    </section>
+
+    <div id="sys-alert" class="alert alert-warning"></div>
+
+    <section id="live">
+      <h2 class="section-title">Live Monitor</h2>
+      
+      <div class="grid-4">
+        <!-- Card 1 -->
+        <div class="glass stat-card">
+          <div class="stat-header">
+            <span>Temperature</span>
+            <div class="stat-icon">🌡️</div>
+          </div>
+          <div class="stat-value">
+            <span id="current-temp">--</span><span class="stat-unit"> °C</span>
+          </div>
+          <div class="stat-footer" id="temp-footer">Waiting for sensor...</div>
+        </div>
+        
+        <!-- Card 2 -->
+        <div class="glass stat-card">
+          <div class="stat-header">
+            <span>Humidity</span>
+            <div class="stat-icon">💧</div>
+          </div>
+          <div class="stat-value">
+            <span id="current-hum">--</span><span class="stat-unit"> %</span>
+          </div>
+          <div class="stat-footer" id="hum-footer">Waiting for sensor...</div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="glass stat-card">
+          <div class="stat-header">
+            <span>ESP32 Status</span>
+            <div class="stat-icon">🔌</div>
+          </div>
+          <div class="stat-value" style="font-size:24px; margin-top:10px;">
+            <span id="conn-status">Disconnected</span>
+          </div>
+          <div class="stat-footer" id="conn-msg">Check USB connection</div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="glass stat-card">
+          <div class="stat-header">
+            <span>Data Collection</span>
+            <div class="stat-icon">📊</div>
+          </div>
+          <div class="stat-value" style="font-size:28px; margin-top:5px;">
+            <span id="data-count">0</span><span class="stat-unit"> pts</span>
+          </div>
+          <div class="stat-footer">Stored locally in SQLite</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="predictions">
+      <h2 class="section-title">Predictive Analytics</h2>
+      <div class="grid-2">
+        <div class="glass pred-panel">
+          <h3 style="margin-bottom: 20px;">Short-term Temperature Forecast</h3>
+          <p style="color:var(--text-muted); font-size:14px; margin-bottom:20px;">
+            Estimates derived from recent historical readings using a localized linear regression model.
+          </p>
+          
+          <div id="pred-content">
+            <div class="pred-row">
+              <span class="pred-time">+5 Minutes</span>
+              <span class="pred-temp" id="pred-5m">-- °C</span>
+            </div>
+            <div class="pred-row">
+              <span class="pred-time">+15 Minutes</span>
+              <span class="pred-temp" id="pred-15m">-- °C</span>
+            </div>
+            <div class="pred-row">
+              <span class="pred-time">+30 Minutes</span>
+              <span class="pred-temp" id="pred-30m">-- °C</span>
+            </div>
+            
+            <div class="pred-info">
+              <div><strong>Method:</strong> <span id="pred-method">--</span></div>
+              <div style="margin-top:5px;"><strong>Trend:</strong> <span id="pred-trend">--</span></div>
+              <div style="margin-top:5px;"><strong>MAE:</strong> <span id="pred-mae">--</span></div>
+            </div>
+          </div>
+          <div id="pred-error" style="display:none; color:var(--warning); padding:20px 0;">
+            Insufficient historical data. Collecting data for prediction...
+          </div>
+        </div>
+
+        <div class="glass chart-container">
+          <canvas id="predChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <section id="historical">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+        <h2 class="section-title" style="margin:0;">Historical Data</h2>
+        <a href="/api/download_csv" class="btn btn-outline" style="padding: 8px 16px; font-size:12px;">Download CSV</a>
+      </div>
+      
+      <div class="grid-2">
+        <div class="glass chart-container">
+          <canvas id="historyTempChart"></canvas>
+        </div>
+        <div class="glass chart-container">
+          <canvas id="historyHumChart"></canvas>
+        </div>
+      </div>
+
+      <div class="glass" style="margin-top:24px; padding:20px; overflow-x:auto;">
+        <h3 style="margin-bottom: 15px; font-size:16px;">Recent Measurements</h3>
+        <table class="data-table" id="history-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Temperature (°C)</th>
+              <th>Humidity (%)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="3" style="text-align:center;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="about">
+      <h2 class="section-title">About Project & Team</h2>
+      <div class="grid-2">
+        <div class="glass" style="padding: 30px;">
+          <h3 style="margin-bottom: 15px; color:var(--primary-cyan);">Project Details</h3>
+          <p style="font-size: 14px; margin-bottom: 10px; color:var(--text-muted);">
+            <strong>Problem:</strong> Environmental conditions need continuous monitoring, but manual measurements do not provide convenient real-time visibility or historical analysis.
+          </p>
+          <p style="font-size: 14px; margin-bottom: 15px; color:var(--text-muted);">
+            <strong>Solution:</strong> An ESP32 and DHT11 sensor collect environmental measurements. A Python-based monitoring application displays real-time values, stores historical readings, and estimates short-term temperature trends from recorded data.
+          </p>
+          
+          <h4 style="margin: 20px 0 10px;">Tech Stack</h4>
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            <span class="nav-status">ESP32</span>
+            <span class="nav-status">DHT11</span>
+            <span class="nav-status">Python</span>
+            <span class="nav-status">Flask</span>
+            <span class="nav-status">SQLite</span>
+            <span class="nav-status">Chart.js</span>
+
+          </div>
+        </div>
+
+        <div class="glass" style="padding: 30px;">
+          <h3 style="margin-bottom: 20px; color:var(--primary-cyan);">Team Members</h3>
+          <div class="team-grid">
+            <div class="team-card glass" style="background:rgba(0,0,0,0.2);">
+              <div class="team-name">Sanskruti Neharkar</div>
+              <div class="team-roll">Roll No. 45</div>
+            </div>
+            <div class="team-card glass" style="background:rgba(0,0,0,0.2);">
+              <div class="team-name">Vishwajit Kamble</div>
+              <div class="team-roll">Roll No. 28</div>
+            </div>
+            <div class="team-card glass" style="background:rgba(0,0,0,0.2);">
+              <div class="team-name">Ved Panse</div>
+              <div class="team-roll">Roll No. 48</div>
+            </div>
+            <div class="team-card glass" style="background:rgba(0,0,0,0.2);">
+              <div class="team-name">Ashish Naykudi</div>
+              <div class="team-roll">Roll No. 44</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    &copy; 2024 IoT Environmental Monitoring Platform. Designed for Real-Time Analytics.
+  </footer>
+
+  <script>
+    // Chart instances
+    let historyTempChart, historyHumChart, predChart;
+
+    // Initialize charts
+    function initCharts() {
+      Chart.defaults.color = '#9eb0c9';
+      Chart.defaults.font.family = 'Inter';
+      
+      const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { maxTicksLimit: 5, maxRotation: 0, autoSkip: true } },
+          y: { grid: { color: 'rgba(255,255,255,0.05)' } }
+        }
+      };
+
+      const ctxTemp = document.getElementById('historyTempChart').getContext('2d');
+      historyTempChart = new Chart(ctxTemp, {
+        type: 'line',
+        data: { labels: [], datasets: [{ label: 'Temperature °C', data: [], borderColor: '#39d6d0', backgroundColor: 'rgba(57, 214, 208, 0.1)', borderWidth: 2, fill: true, tension: 0.2, pointRadius: 0, pointHoverRadius: 4 }] },
+        options: { ...commonOptions, plugins: { title: { display: true, text: 'Temperature History (Last 15)', color: '#fff' }, legend: {display: false} } }
+      });
+
+      const ctxHum = document.getElementById('historyHumChart').getContext('2d');
+      historyHumChart = new Chart(ctxHum, {
+        type: 'line',
+        data: { labels: [], datasets: [{ label: 'Humidity %', data: [], borderColor: '#fbbf24', backgroundColor: 'rgba(251, 191, 36, 0.1)', borderWidth: 2, fill: true, tension: 0.2, pointRadius: 0, pointHoverRadius: 4 }] },
+        options: { ...commonOptions, plugins: { title: { display: true, text: 'Humidity History (Last 15)', color: '#fff' }, legend: {display: false} } }
+      });
+
+      const ctxPred = document.getElementById('predChart').getContext('2d');
+      predChart = new Chart(ctxPred, {
+        type: 'line',
+        data: { labels: [], datasets: [
+          { label: 'Historical Temp', data: [], borderColor: '#9eb0c9', borderDash: [5, 5], borderWidth: 2, tension: 0.4 },
+          { label: 'Forecast', data: [], borderColor: '#39d6d0', borderWidth: 2, tension: 0 }
+        ]},
+        options: { ...commonOptions, plugins: { title: { display: true, text: 'Temperature Forecast Trend', color: '#fff' }, legend: {display: true, labels: {color: '#9eb0c9'}} } }
+      });
+    }
+
+    function formatTime(isoStr) {
+      if (!isoStr) return '';
+      const d = new Date(isoStr);
+      return d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+    }
+
+    async function fetchCurrent() {
+      try {
+        const res = await fetch('/api/current');
+        const data = await res.json();
+        
+        const isConn = data.connected;
+        document.getElementById('nav-dot').className = 'status-dot ' + (isConn ? 'active' : '');
+        document.getElementById('nav-status-text').textContent = isConn ? 'ESP32 Connected' : 'Disconnected';
+        
+        document.getElementById('conn-status').textContent = isConn ? 'Connected' : 'Disconnected';
+        document.getElementById('conn-status').style.color = isConn ? 'var(--success)' : 'var(--danger)';
+        document.getElementById('conn-msg').textContent = data.message;
+        
+        if (data.temperature !== null) {
+          document.getElementById('current-temp').textContent = data.temperature.toFixed(1);
+          document.getElementById('temp-footer').textContent = 'Last update: ' + formatTime(data.last_updated);
+        }
+        if (data.humidity !== null) {
+          document.getElementById('current-hum').textContent = data.humidity.toFixed(0);
+          document.getElementById('hum-footer').textContent = 'Last update: ' + formatTime(data.last_updated);
+        }
+        
+        document.getElementById('data-count').textContent = data.readings_count;
+
+        
+        const alertBox = document.getElementById('sys-alert');
+        if (!isConn) {
+          alertBox.textContent = 'ESP32 is disconnected. Please check your USB connection or COM port settings.';
+          alertBox.classList.add('visible');
+        } else {
+          alertBox.classList.remove('visible');
+        }
+      } catch (err) {
+        console.error("Fetch current error:", err);
+      }
+    }
+
+    async function fetchPredictions() {
+      try {
+        const res = await fetch('/api/predictions');
+        const data = await res.json();
+        
+        if (data.status === 'ok') {
+          document.getElementById('pred-content').style.display = 'block';
+          document.getElementById('pred-error').style.display = 'none';
+          
+          document.getElementById('pred-5m').textContent = data.predictions['5m'].toFixed(1) + ' °C';
+          document.getElementById('pred-15m').textContent = data.predictions['15m'].toFixed(1) + ' °C';
+          document.getElementById('pred-30m').textContent = data.predictions['30m'].toFixed(1) + ' °C';
+          
+          document.getElementById('pred-method').textContent = data.method;
+          document.getElementById('pred-trend').textContent = data.trend;
+          document.getElementById('pred-mae').textContent = data.metrics.mae + ' °C';
+          
+          // Update Prediction Chart (Simple visualization)
+          const labels = ['Now', '+5m', '+15m', '+30m'];
+          const currentT = parseFloat(document.getElementById('current-temp').textContent) || data.predictions['5m'];
+          const forecastData = [currentT, data.predictions['5m'], data.predictions['15m'], data.predictions['30m']];
+          
+          predChart.data.labels = labels;
+          predChart.data.datasets[1].data = forecastData;
+          predChart.update();
+        } else {
+          document.getElementById('pred-content').style.display = 'none';
+          document.getElementById('pred-error').style.display = 'block';
+          document.getElementById('pred-error').textContent = data.message;
+        }
+      } catch (err) {
+        console.error("Fetch prediction error:", err);
+      }
+    }
+
+    async function fetchHistory() {
+      try {
+        const res = await fetch('/api/history?hours=1');
+        const data = await res.json();
+        
+        if (data.history && data.history.length > 0) {
+          const chartData = data.history.slice(-15); // Use only the latest 15 readings for the chart
+          const labels = chartData.map(row => formatTime(row.timestamp));
+          const temps = chartData.map(row => row.temperature);
+          const hums = chartData.map(row => row.humidity);
+          
+          historyTempChart.data.labels = labels;
+          historyTempChart.data.datasets[0].data = temps;
+          historyTempChart.update();
+          
+          historyHumChart.data.labels = labels;
+          historyHumChart.data.datasets[0].data = hums;
+          historyHumChart.update();
+          
+          // Update table (last 10)
+          const tbody = document.querySelector('#history-table tbody');
+          tbody.innerHTML = '';
+          const recent = [...data.history].reverse().slice(0, 10);
+          recent.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${formatTime(row.timestamp)}</td>
+              <td>${row.temperature.toFixed(1)}</td>
+              <td>${row.humidity.toFixed(0)}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+      } catch (err) {
+        console.error("Fetch history error:", err);
+      }
+    }
+
+    // Polling logic
+    initCharts();
+    
+    // Initial fetch
+    fetchCurrent();
+    fetchHistory();
+    fetchPredictions();
+    
+    // Intervals
+    setInterval(fetchCurrent, 2000);
+    setInterval(fetchHistory, 10000);
+    setInterval(fetchPredictions, 10000);
+
+  </script>
+</body>
+</html>
