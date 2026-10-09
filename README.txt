@@ -2,7 +2,7 @@ ESP32 DHT11 Local Web Dashboard
 ================================
 
 Requirements
-- Python installed
+- Python installed.
 - ESP32 board connected by USB
 - Arduino sketch prints lines such as:
     Temperature: 32.50 °C
