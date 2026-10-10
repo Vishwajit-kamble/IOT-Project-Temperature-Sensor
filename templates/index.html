@@ -8,17 +8,17 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
-      --bg-color: #050b14;
-      --card-bg: rgba(13, 22, 38, 0.6);
-      --card-border: rgba(57, 214, 208, 0.15);
-      --primary-cyan: #39d6d0;
-      --primary-turquoise: #1eb9af;
-      --accent-blue: #2a6df4;
-      --text-main: #e8eef8;
-      --text-muted: #9eb0c9;
-      --danger: #f87171;
-      --success: #34d399;
-      --warning: #fbbf24;
+      --bg-color: #030712;
+      --card-bg: rgba(17, 24, 39, 0.65);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary-cyan: #06b6d4;
+      --primary-turquoise: #14b8a6;
+      --accent-blue: #3b82f6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --danger: #f43f5e;
+      --success: #10b981;
+      --warning: #f59e0b;
     }
     
     * {
@@ -31,8 +31,10 @@
       font-family: 'Inter', sans-serif;
       background-color: var(--bg-color);
       background-image: 
-        radial-gradient(circle at 15% 50%, rgba(20, 44, 66, 0.4), transparent 25%),
-        radial-gradient(circle at 85% 30%, rgba(57, 214, 208, 0.05), transparent 25%);
+        radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.15), transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(6, 182, 212, 0.15), transparent 25%),
+        radial-gradient(circle at 50% 100%, rgba(20, 184, 166, 0.1), transparent 40%);
+      background-attachment: fixed;
       color: var(--text-main);
       line-height: 1.6;
       overflow-x: hidden;
@@ -42,12 +44,42 @@
     /* Glassmorphism */
     .glass {
       background: var(--card-bg);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border: 1px solid var(--card-border);
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      border-top: 1px solid rgba(255,255,255,0.15);
+      border-left: 1px solid rgba(255,255,255,0.15);
+      border-radius: 24px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+      70% { box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-15px); }
+      100% { transform: translateY(0px); }
+    }
+
+    .grid-4 > div, .grid-2 > div, .hero, .glass.table-container, .pred-panel {
+      animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      opacity: 0;
+    }
+    .grid-4 > div:nth-child(1) { animation-delay: 0.1s; }
+    .grid-4 > div:nth-child(2) { animation-delay: 0.2s; }
+    .grid-4 > div:nth-child(3) { animation-delay: 0.3s; }
+    .grid-4 > div:nth-child(4) { animation-delay: 0.4s; }
+    .grid-2 > div:nth-child(1) { animation-delay: 0.2s; }
+    .grid-2 > div:nth-child(2) { animation-delay: 0.4s; }
 
     /* Navbar */
     nav {
@@ -58,266 +90,380 @@
       justify-content: space-between;
       align-items: center;
       padding: 15px 40px;
-      background: rgba(5, 11, 20, 0.8);
-      backdrop-filter: blur(10px);
+      background: rgba(3, 7, 18, 0.7);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
       border-bottom: 1px solid rgba(255,255,255,0.05);
     }
     .logo {
       font-weight: 700;
-      font-size: 20px;
+      font-size: 22px;
       color: #fff;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
+      letter-spacing: -0.5px;
     }
     .logo-icon {
       color: var(--primary-cyan);
+      filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.6));
     }
     .nav-links {
       display: flex;
-      gap: 25px;
+      gap: 30px;
     }
     .nav-links a {
       color: var(--text-muted);
       text-decoration: none;
       font-size: 14px;
       font-weight: 500;
-      transition: color 0.3s;
+      transition: all 0.3s;
+      position: relative;
     }
     .nav-links a:hover {
       color: var(--primary-cyan);
     }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      width: 0; height: 2px;
+      bottom: -4px; left: 0;
+      background: var(--primary-cyan);
+      transition: width 0.3s ease;
+      border-radius: 2px;
+    }
+    .nav-links a:hover::after {
+      width: 100%;
+    }
     .nav-status {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      padding: 6px 12px;
-      border-radius: 20px;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 30px;
       background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
     }
     .status-dot {
-      width: 8px; height: 8px;
+      width: 10px; height: 10px;
       border-radius: 50%;
       background: var(--danger);
       box-shadow: 0 0 10px var(--danger);
-      transition: background 0.3s, box-shadow 0.3s;
+      transition: all 0.3s;
     }
     .status-dot.active {
       background: var(--success);
-      box-shadow: 0 0 10px var(--success);
+      box-shadow: 0 0 12px var(--success);
+      animation: pulseGlow 2s infinite;
     }
 
     /* Container */
     .container {
-      max-width: 1200px;
+      max-width: 1280px;
       margin: 0 auto;
-      padding: 100px 20px 40px;
+      padding: 120px 24px 60px;
     }
 
     /* Hero Section */
     .hero {
       text-align: center;
-      padding: 60px 0;
+      padding: 80px 0;
       position: relative;
     }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(6,182,212,0.1) 0%, transparent 60%);
+      filter: blur(40px);
+      z-index: -1;
+      animation: float 8s ease-in-out infinite;
+    }
     .hero h1 {
-      font-size: clamp(32px, 5vw, 56px);
-      font-weight: 700;
-      margin-bottom: 20px;
-      background: linear-gradient(135deg, #fff 0%, #9eb0c9 100%);
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 800;
+      margin-bottom: 24px;
+      letter-spacing: -1.5px;
+      line-height: 1.1;
+      background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
     .hero p {
       color: var(--text-muted);
       font-size: 18px;
-      max-width: 600px;
+      max-width: 650px;
       margin: 0 auto 40px;
+      font-weight: 400;
     }
     .hero-buttons {
       display: flex;
       justify-content: center;
-      gap: 15px;
+      gap: 20px;
     }
     .btn {
-      padding: 12px 24px;
-      border-radius: 8px;
+      padding: 14px 28px;
+      border-radius: 12px;
       font-weight: 600;
-      font-size: 14px;
+      font-size: 15px;
       text-decoration: none;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       border: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
     .btn-primary {
-      background: linear-gradient(135deg, var(--primary-cyan), var(--primary-turquoise));
-      color: #000;
-      box-shadow: 0 4px 15px rgba(57, 214, 208, 0.3);
+      background: linear-gradient(135deg, var(--primary-cyan), var(--accent-blue));
+      color: #fff;
+      box-shadow: 0 8px 25px rgba(6, 182, 212, 0.4);
     }
     .btn-primary:hover {
-      box-shadow: 0 6px 20px rgba(57, 214, 208, 0.5);
-      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(6, 182, 212, 0.6);
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, #08c8ea, #4f90f7);
     }
     .btn-outline {
-      background: transparent;
+      background: rgba(255,255,255,0.03);
       color: var(--text-main);
-      border: 1px solid var(--text-muted);
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
     }
     .btn-outline:hover {
-      border-color: var(--primary-cyan);
-      color: var(--primary-cyan);
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.3);
+      transform: translateY(-3px);
     }
 
     /* Section Headers */
     .section-title {
-      font-size: 24px;
-      font-weight: 600;
-      margin-bottom: 20px;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 30px;
       color: #fff;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
+      letter-spacing: -0.5px;
+    }
+    .section-title::before {
+      content: '';
+      display: block;
+      width: 12px;
+      height: 24px;
+      background: linear-gradient(180deg, var(--primary-cyan), var(--accent-blue));
+      border-radius: 4px;
+      box-shadow: 0 0 12px rgba(6, 182, 212, 0.6);
     }
     section {
-      margin-bottom: 60px;
-      padding-top: 80px;
-      margin-top: -80px;
+      margin-bottom: 80px;
+      padding-top: 100px;
+      margin-top: -100px;
     }
 
     /* Grid Layouts */
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
     .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
 
     /* Cards */
     .stat-card {
-      padding: 24px;
+      padding: 28px;
       display: flex;
       flex-direction: column;
       position: relative;
       overflow: hidden;
     }
+    .stat-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5), 0 0 25px rgba(6, 182, 212, 0.15);
+      border-color: rgba(6, 182, 212, 0.3);
+      background: rgba(20, 28, 45, 0.7);
+    }
     .stat-card::before {
       content: '';
       position: absolute;
-      top: 0; left: 0; right: 0; height: 2px;
-      background: linear-gradient(90deg, transparent, var(--primary-cyan), transparent);
-      opacity: 0.5;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, transparent, var(--primary-cyan), var(--accent-blue), transparent);
+      opacity: 0.8;
     }
     .stat-header {
       display: flex;
       justify-content: space-between;
       color: var(--text-muted);
-      font-size: 14px;
-      margin-bottom: 15px;
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 20px;
     }
     .stat-icon {
-      font-size: 20px;
-      background: rgba(57, 214, 208, 0.1);
-      width: 40px; height: 40px;
+      font-size: 22px;
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(59, 130, 246, 0.15));
+      width: 48px; height: 48px;
       display: flex; align-items: center; justify-content: center;
-      border-radius: 10px;
+      border-radius: 14px;
       color: var(--primary-cyan);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
     .stat-value {
-      font-size: 36px;
-      font-weight: 700;
+      font-size: 44px;
+      font-weight: 800;
       color: #fff;
       margin-bottom: 5px;
+      letter-spacing: -1px;
+      text-shadow: 0 4px 15px rgba(0,0,0,0.4);
     }
     .stat-unit {
-      font-size: 18px;
-      color: var(--text-muted);
-      font-weight: 400;
+      font-size: 20px;
+      color: var(--primary-cyan);
+      font-weight: 600;
     }
     .stat-footer {
-      font-size: 12px;
+      font-size: 13px;
       color: var(--text-muted);
       margin-top: auto;
-      padding-top: 15px;
+      padding-top: 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .stat-footer::before {
+      content: '●';
+      font-size: 8px;
+      color: var(--primary-cyan);
+      filter: drop-shadow(0 0 5px var(--primary-cyan));
     }
 
     /* Predictions */
     .pred-panel {
-      padding: 30px;
+      padding: 35px;
     }
     .pred-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 15px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding: 18px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      transition: all 0.3s;
+    }
+    .pred-row:hover {
+      background: rgba(255,255,255,0.03);
+      padding-left: 12px;
+      padding-right: 12px;
+      border-radius: 8px;
+      border-bottom-color: transparent;
     }
     .pred-row:last-child { border-bottom: none; }
-    .pred-time { color: var(--text-muted); font-size: 14px; }
-    .pred-temp { font-size: 20px; font-weight: 600; color: var(--primary-cyan); }
-    .pred-info { font-size: 12px; color: var(--text-muted); margin-top: 15px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;}
+    .pred-time { color: var(--text-muted); font-size: 15px; font-weight: 500;}
+    .pred-temp { font-size: 24px; font-weight: 700; color: #fff; text-shadow: 0 0 15px rgba(6, 182, 212, 0.5);}
+    .pred-info { font-size: 13px; color: var(--text-muted); margin-top: 20px; background: rgba(0,0,0,0.3); padding: 18px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.05);}
 
     /* Charts */
     .chart-container {
       position: relative;
-      height: 300px;
+      height: 320px;
       width: 100%;
-      padding: 20px;
+      padding: 25px;
     }
 
     /* Table */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 16px;
+      background: rgba(0,0,0,0.15);
+      border: 1px solid rgba(255,255,255,0.03);
+    }
     .data-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 14px;
+      font-size: 15px;
     }
     .data-table th, .data-table td {
-      padding: 12px 15px;
+      padding: 18px 24px;
       text-align: left;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
     }
     .data-table th {
       color: var(--text-muted);
-      font-weight: 500;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 1px;
+    }
+    .data-table tbody tr {
+      transition: background 0.3s;
+    }
+    .data-table tbody tr:hover {
+      background: rgba(255,255,255,0.04);
     }
 
     /* Team */
     .team-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
+      gap: 24px;
     }
     .team-card {
-      padding: 20px;
+      padding: 30px 20px;
       text-align: center;
+      background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 100%);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 20px;
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.4s;
     }
-    .team-name { font-weight: 600; color: #fff; margin-bottom: 5px; }
-    .team-roll { color: var(--primary-cyan); font-size: 14px; }
+    .team-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(6, 182, 212, 0.4);
+      background: linear-gradient(180deg, rgba(6, 182, 212, 0.05) 0%, rgba(255,255,255,0) 100%);
+    }
+    .team-name { font-weight: 700; color: #fff; margin-bottom: 8px; font-size: 18px;}
+    .team-roll { color: var(--primary-cyan); font-size: 14px; font-weight: 500;}
 
     /* Footer */
     footer {
       text-align: center;
-      padding: 30px;
+      padding: 40px;
       border-top: 1px solid rgba(255,255,255,0.05);
       color: var(--text-muted);
       font-size: 14px;
-      margin-top: 50px;
+      margin-top: 80px;
+      background: rgba(0,0,0,0.3);
     }
 
     /* Alerts */
     .alert {
-      padding: 15px 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      font-size: 14px;
+      padding: 16px 24px;
+      border-radius: 14px;
+      margin-bottom: 30px;
+      font-size: 15px;
       display: none;
+      font-weight: 500;
+      backdrop-filter: blur(10px);
     }
-    .alert.visible { display: block; }
-    .alert-warning { background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); color: var(--warning); }
+    .alert.visible { display: block; animation: fadeInUp 0.5s ease; }
+    .alert-warning { 
+      background: rgba(245, 158, 11, 0.15); 
+      border: 1px solid rgba(245, 158, 11, 0.4); 
+      color: var(--warning); 
+      box-shadow: 0 8px 30px rgba(245, 158, 11, 0.15);
+    }
     
     @media (max-width: 900px) {
-      .grid-4, .grid-2 { grid-template-columns: 1fr; }
+      .grid-4 { grid-template-columns: repeat(2, 1fr); }
+      .grid-2 { grid-template-columns: 1fr; }
       nav { padding: 15px 20px; flex-direction: column; gap: 15px; }
       .nav-links { flex-wrap: wrap; justify-content: center; }
-      .container { padding-top: 140px; }
+      .container { padding-top: 160px; }
+      .hero h1 { font-size: 32px; }
     }
-  </style>
+    @media (max-width: 600px) {
+      .grid-4 { grid-template-columns: 1fr; }
+    }
+</style>
 </head>
 <body>
 
@@ -460,9 +606,10 @@
         </div>
       </div>
 
-      <div class="glass" style="margin-top:24px; padding:20px; overflow-x:auto;">
-        <h3 style="margin-bottom: 15px; font-size:16px;">Recent Measurements</h3>
-        <table class="data-table" id="history-table">
+            <div class="glass" style="margin-top:24px; padding:30px;">
+        <h3 style="margin-bottom: 24px; font-size:18px; color:#fff; display:flex; align-items:center; gap:10px;"><span style="color:var(--primary-cyan)">●</span> Recent Measurements</h3>
+        <div class="table-container">
+          <table class="data-table" id="history-table">
           <thead>
             <tr>
               <th>Timestamp</th>
@@ -474,6 +621,7 @@
             <tr><td colspan="3" style="text-align:center;">Loading...</td></tr>
           </tbody>
         </table>
+        </div>
       </div>
     </section>
 
@@ -533,7 +681,7 @@
 
     // Initialize charts
     function initCharts() {
-      Chart.defaults.color = '#9eb0c9';
+      Chart.defaults.color = '#94a3b8';
       Chart.defaults.font.family = 'Inter';
       
       const commonOptions = {
@@ -542,34 +690,54 @@
         plugins: {
           legend: { display: false }
         },
+        interaction: { mode: 'index', intersect: false },
         scales: {
-          x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { maxTicksLimit: 5, maxRotation: 0, autoSkip: true } },
-          y: { grid: { color: 'rgba(255,255,255,0.05)' } }
+          x: { grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false }, ticks: { maxTicksLimit: 6, maxRotation: 0, autoSkip: true, color: '#94a3b8' } },
+          y: { grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false }, ticks: { color: '#94a3b8' } }
         }
       };
 
       const ctxTemp = document.getElementById('historyTempChart').getContext('2d');
+      const gradTemp = ctxTemp.createLinearGradient(0, 0, 0, 300);
+      gradTemp.addColorStop(0, 'rgba(6, 182, 212, 0.4)');
+      gradTemp.addColorStop(1, 'rgba(6, 182, 212, 0.0)');
+      
       historyTempChart = new Chart(ctxTemp, {
         type: 'line',
-        data: { labels: [], datasets: [{ label: 'Temperature °C', data: [], borderColor: '#39d6d0', backgroundColor: 'rgba(57, 214, 208, 0.1)', borderWidth: 2, fill: true, tension: 0.2, pointRadius: 0, pointHoverRadius: 4 }] },
-        options: { ...commonOptions, plugins: { title: { display: true, text: 'Temperature History (Last 15)', color: '#fff' }, legend: {display: false} } }
+        data: { labels: [], datasets: [{ label: 'Temperature °C', data: [], borderColor: '#06b6d4', backgroundColor: gradTemp, borderWidth: 3, fill: true, tension: 0.4, pointBackgroundColor: '#06b6d4', pointRadius: 0, pointHoverRadius: 6, pointHoverBackgroundColor: '#fff', pointHoverBorderColor: '#06b6d4', pointHoverBorderWidth: 3 }] },
+        options: { ...commonOptions, plugins: { title: { display: true, text: 'Temperature History (Last 15)', color: '#f8fafc', font: {size: 16, weight: '600'} }, legend: {display: false} } }
       });
 
       const ctxHum = document.getElementById('historyHumChart').getContext('2d');
+      const gradHum = ctxHum.createLinearGradient(0, 0, 0, 300);
+      gradHum.addColorStop(0, 'rgba(245, 158, 11, 0.4)');
+      gradHum.addColorStop(1, 'rgba(245, 158, 11, 0.0)');
+
       historyHumChart = new Chart(ctxHum, {
         type: 'line',
-        data: { labels: [], datasets: [{ label: 'Humidity %', data: [], borderColor: '#fbbf24', backgroundColor: 'rgba(251, 191, 36, 0.1)', borderWidth: 2, fill: true, tension: 0.2, pointRadius: 0, pointHoverRadius: 4 }] },
-        options: { ...commonOptions, plugins: { title: { display: true, text: 'Humidity History (Last 15)', color: '#fff' }, legend: {display: false} } }
+        data: { labels: [], datasets: [{ label: 'Humidity %', data: [], borderColor: '#f59e0b', backgroundColor: gradHum, borderWidth: 3, fill: true, tension: 0.4, pointBackgroundColor: '#f59e0b', pointRadius: 0, pointHoverRadius: 6, pointHoverBackgroundColor: '#fff', pointHoverBorderColor: '#f59e0b', pointHoverBorderWidth: 3 }] },
+        options: { 
+          ...commonOptions, 
+          scales: {
+            x: commonOptions.scales.x,
+            y: { ...commonOptions.scales.y, suggestedMin: 20, suggestedMax: 80 }
+          },
+          plugins: { title: { display: true, text: 'Humidity History (Last 15)', color: '#f8fafc', font: {size: 16, weight: '600'} }, legend: {display: false} } 
+        }
       });
 
       const ctxPred = document.getElementById('predChart').getContext('2d');
+      const gradPred = ctxPred.createLinearGradient(0, 0, 0, 300);
+      gradPred.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
+      gradPred.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+
       predChart = new Chart(ctxPred, {
         type: 'line',
         data: { labels: [], datasets: [
-          { label: 'Historical Temp', data: [], borderColor: '#9eb0c9', borderDash: [5, 5], borderWidth: 2, tension: 0.4 },
-          { label: 'Forecast', data: [], borderColor: '#39d6d0', borderWidth: 2, tension: 0 }
+          { label: 'Historical Temp', data: [], borderColor: '#94a3b8', borderDash: [5, 5], borderWidth: 2, tension: 0.4, pointRadius: 0, pointHoverRadius: 4 },
+          { label: 'Forecast', data: [], borderColor: '#3b82f6', backgroundColor: gradPred, fill: true, borderWidth: 3, tension: 0.4, pointBackgroundColor: '#3b82f6', pointRadius: 4, pointHoverRadius: 7, pointHoverBackgroundColor: '#fff', pointHoverBorderWidth: 3 }
         ]},
-        options: { ...commonOptions, plugins: { title: { display: true, text: 'Temperature Forecast Trend', color: '#fff' }, legend: {display: true, labels: {color: '#9eb0c9'}} } }
+        options: { ...commonOptions, plugins: { title: { display: true, text: 'Temperature Forecast Trend', color: '#f8fafc', font: {size: 16, weight: '600'} }, legend: {display: true, labels: {color: '#94a3b8', font: {family: 'Inter'}}} } }
       });
     }
 
